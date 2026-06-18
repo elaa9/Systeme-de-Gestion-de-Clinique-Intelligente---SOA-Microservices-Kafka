@@ -1,0 +1,37 @@
+syntax = "proto3";
+package prescription;
+
+service PrescriptionService {
+  rpc CreatePrescription (CreatePrescriptionRequest) returns (Prescription);
+  rpc GetPrescription    (GetPrescriptionRequest)    returns (Prescription);
+  rpc ListPrescriptions  (ListPrescriptionsRequest)  returns (PrescriptionList);
+}
+
+message Prescription {
+  string id             = 1;
+  string patient_id     = 2;
+  string appointment_id = 3;
+  string drug           = 4;
+  string dosage         = 5;
+  string instructions   = 6;
+}
+
+message CreatePrescriptionRequest {
+  string patient_id     = 1;
+  string appointment_id = 2;
+  string drug           = 3;
+  string dosage         = 4;
+  string instructions   = 5;
+}
+
+message GetPrescriptionRequest {
+  string id = 1;
+}
+
+message ListPrescriptionsRequest {
+  string patient_id = 1;
+}
+
+message PrescriptionList {
+  repeated Prescription prescriptions = 1;
+}
