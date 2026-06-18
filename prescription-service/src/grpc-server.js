@@ -2,7 +2,7 @@ const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const { getDatabase } = require('./db');
+const db = require('./db');
 
 const PROTO_PATH = path.join(__dirname, '..', '..', 'proto', 'prescription.proto');
 
@@ -20,8 +20,7 @@ async function CreatePrescription(call, callback) {
   const { patient_id, appointment_id, drug, dosage, instructions } = call.request;
   const id = uuidv4();
   try {
-    const dbRx = await getDatabase();
-    await dbRx.prescriptions.insert({
+    const doc = await db.insert({
       id,
       patient_id,
       appointment_id,
@@ -30,7 +29,7 @@ async function CreatePrescription(call, callback) {
       instructions: instructions || '',
       created_at: new Date().toISOString(),
     });
-    callback(null, { id, patient_id, appointment_id, drug, dosage, instructions: instructions || '' });
+    callback(null, { id: doc.id, patient_id: doc.patient_id, appointment_id: doc.appointment_id, drug: doc.drug, dosage: doc.dosage, instructions: doc.instructions });
   } catch (err) {
     callback({ code: grpc.status.INTERNAL, message: err.message });
   }
@@ -39,16 +38,11 @@ async function CreatePrescription(call, callback) {
 async function GetPrescription(call, callback) {
   const { id } = call.request;
   try {
-    const dbRx = await getDatabase();
-    const doc = await dbRx.prescriptions.findOne(id).exec();
+    const doc = await db.findOne({ id }).exec();
     if (!doc) {
       return callback({ code: grpc.status.NOT_FOUND, message: 'Prescription not found' });
     }
-    const data = doc.toJSON();
-    callback(null, {
-      id: data.id, patient_id: data.patient_id, appointment_id: data.appointment_id,
-      drug: data.drug, dosage: data.dosage, instructions: data.instructions,
-    });
+    callback(null, { id: doc.id, patient_id: doc.patient_id, appointment_id: doc.appointment_id, drug: doc.drug, dosage: doc.dosage, instructions: doc.instructions });
   } catch (err) {
     callback({ code: grpc.status.INTERNAL, message: err.message });
   }
@@ -57,20 +51,16 @@ async function GetPrescription(call, callback) {
 async function ListPrescriptions(call, callback) {
   const { patient_id } = call.request;
   try {
-    const dbRx = await getDatabase();
     let docs;
     if (patient_id) {
-      docs = await dbRx.prescriptions.find({ selector: { patient_id } }).exec();
+      docs = await db.find({ patient_id }).exec();
     } else {
-      docs = await dbRx.prescriptions.find().exec();
+      docs = await db.find({}).exec();
     }
-    const prescriptions = docs.map(doc => {
-      const data = doc.toJSON();
-      return {
-        id: data.id, patient_id: data.patient_id, appointment_id: data.appointment_id,
-        drug: data.drug, dosage: data.dosage, instructions: data.instructions,
-      };
-    });
+    const prescriptions = docs.map(doc => ({
+      id: doc.id, patient_id: doc.patient_id, appointment_id: doc.appointment_id,
+      drug: doc.drug, dosage: doc.dosage, instructions: doc.instructions,
+    }));
     callback(null, { prescriptions });
   } catch (err) {
     callback({ code: grpc.status.INTERNAL, message: err.message });

@@ -14,7 +14,7 @@ Trois microservices indépendants, une API Gateway, un broker Kafka 4.0 (KRaft) 
 |---|---|---|---|
 | **Patient Service** | Profils patients, dossiers médicaux | SQLite3 | 50051 |
 | **Appointment Service** | Réservation et gestion des RDV | SQLite3 | 50052 |
-| **Prescription Service** | Ordonnances et médicaments | RxDB (NoSQL) | 50053 |
+| **Prescription Service** | Ordonnances et médicaments | NeDB (NoSQL) | 50053 |
 | **API Gateway** | Point d'entrée REST + GraphQL | — | 3000 (HTTP) |
 
 ## Communication
