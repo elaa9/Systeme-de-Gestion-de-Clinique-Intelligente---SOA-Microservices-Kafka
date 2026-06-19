@@ -1,8 +1,9 @@
 FROM node:23-alpine
 WORKDIR /app
-COPY package.json ./
+COPY appointment-service/ ./appointment-service/
+COPY proto/ ./proto/
+WORKDIR /app/appointment-service
 RUN npm install --legacy-peer-deps
-COPY . .
 RUN mkdir -p data
 EXPOSE 50052
 CMD ["node", "index.js"]
