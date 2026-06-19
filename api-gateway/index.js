@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const { graphqlHTTP } = require('express-graphql');
 const schema = require('./src/graphql/schema');
-const rootResolver = require('./src/graphql/resolvers');
 const restRoutes = require('./src/rest/routes');
 
 const app = express();
@@ -23,7 +22,6 @@ app.use('/api', restRoutes);
 
 app.use('/graphql', graphqlHTTP({
   schema,
-  rootValue: rootResolver,
   graphiql: true,
 }));
 
